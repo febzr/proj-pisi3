@@ -46,11 +46,12 @@ with dist2:
 disp = st.form(border=True, key='disp')
 
 with disp:
-    st.header('Gráfico de dispersão')
+    st.header('Gráficos de Violino')
     dispx = st.selectbox('Selecione o eixo x:', df.columns)
     dispy = st.selectbox('Selecione o eixo y:', df.columns)
-    if disp.form_submit_button('Gerar gráfico'):
-        fig = px.scatter(df, x=dispx, y=dispy, width=650)
+    but = disp.form_submit_button('Gerar gráfico')
+    if but:
+        fig = px.violin(df, x=dispx, y=dispy, width=650)
         st.plotly_chart(fig)
 
 featimp = st.form(border=True, key='featimp')
