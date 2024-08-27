@@ -2,14 +2,22 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
+import pickle
 from sklearn.ensemble import RandomForestClassifier
 import pipeline
+from catboost import CatBoostClassifier
+import tensorflow as tf
+import keras
 
 # Carregar os modelos
-modrf = joblib.load('./models/modelo_rf.pkl')
-modlog = joblib.load('./models/modelo_logreg.pkl')
-modknn = joblib.load('./models/modelo_knn.pkl')
-modcat = joblib.load('./models/modelo_catboost.pkl')
+modrf = pickle.load(open('./models/rf.pkl', 'rb'))
+modlog = pickle.load(open('./models/lr.pkl', 'rb'))
+modknn = pickle.load(open('./models/knn_model.pkl', 'rb'))
+
+modcat = CatBoostClassifier()
+modcat.load_model('./models/catboost_model')
+
+modredes = keras.models.load_model('./models/redes.keras', custom_objects={'f1_scorez': 'f1_scorez'})
 
 st.title('Previsão de Ataque Cardíaco')
 st.write('Baseado nos dados inseridos, o modelo prevê se o paciente terá um ataque cardíaco ou não.')
@@ -22,11 +30,9 @@ if sex == "Masculino":
 else:
     sex = "Female"
 
-genhealth = st.radio(label='Saúde Física:', options=["Excelente", "Muito Boa", "Boa", "Regular", "Ruim"], index=None, horizontal=True)
-if genhealth == "Excelente":
+genhealth = st.radio(label='Saúde Física:', options=["Ótima", "Boa", "Regular", "Ruim"], index=None, horizontal=True)
+if genhealth == "Ótima":
     genhealth = "Excellent"
-elif genhealth == "Muito Boa":
-    genhealth = "Very Good"
 elif genhealth == "Boa":
     genhealth = "Good"
 elif genhealth == "Regular":
@@ -178,7 +184,7 @@ elif ecig == "Usa ocasionalmente":
 elif ecig == "Já usou":
     ecig = "Not at all (right now)"
 elif ecig == "Nunca usou":
-    ecig = "Never used e-cigarettes"
+    ecig = "Never used e-cigarettes in my entire life"
 
 chestscan = st.radio(label='Você já fez uma tomografia computadorizada do tórax?', options=["Sim", "Não"], index=None, horizontal=True)
 if chestscan == "Sim":
@@ -188,11 +194,11 @@ elif chestscan == "Não":
 
 race = st.radio(label='Qual a sua raça?', options=["Preto", "Branco", "Pardo", "Hispânico"], index=None, horizontal=False)
 if race == "Preto":
-    race = "Black only, Non-hispanic"
+    race = "Black only, Non-Hispanic"
 if race == "Branco":
-    race = "White only, Non-hispanic"
+    race = "White only, Non-Hispanic"
 if race == "Pardo":
-    race = "Multiracial, Non-hispanic"
+    race = "Multiracial, Non-Hispanic"
 if race == "Hispânico":
     race == "Hispanic"
 
@@ -261,9 +267,9 @@ elif covidpos == "Não":
 
 tetanus = st.radio(label='Você tomou a vacina contra o tétano nos últimos 10 anos?', options=["Sim", "Não"], index=None, horizontal=True)
 if tetanus == "Sim":
-    tetanus = "Yes, recieved Tdap"
+    tetanus = "Yes, received Tdap"
 elif tetanus == "Não":
-    tetanus = "No, did not recieve any tetanus shot in the past 10 yeas"
+    tetanus = "No, did not receive any tetanus shot in the past 10 years"
 
 highrisklastyear = st.radio(label='Você foi um paciente de alto risco nos útlimos 12 meses?', options=["Sim", "Não"], index=None, horizontal=True)
 if highrisklastyear == "Sim":
@@ -275,24 +281,67 @@ if st.button('Prever Ataque Cardíaco'):
 
     data_org = pd.read_parquet('heart_2022_no_nans.parquet')
     data_org.drop(columns=['State'], inplace=True)
+    data_org.drop(columns=['HadHeartAttack'], inplace=True)
 
     bmi = weight / (height ** 2)
 
     # Criar um dataframe com os dados inseridos
 
-    data = [sex, genhealth, physhealthdays, menthealthdays, lastcheckup, physact, sleephours, removedteeth, angina, stroke, asthma, skincancer, copd, depressivedisorder, kidneydisease, arthitis, diabetes, deaf, blind, concentrating, walking, dressing, errands, smoker, ecig, chestscan, race, agecat, height, weight, bmi, alcohol, hivtest, fluvax, pneumovax, tetanus, highrisklastyear, covidpos, 0]
+    data = [sex, genhealth, physhealthdays, menthealthdays, lastcheckup, physact, sleephours, removedteeth, angina, stroke, asthma, skincancer, copd, depressivedisorder, kidneydisease, arthitis, diabetes, deaf, blind, concentrating, walking, dressing, errands, smoker, ecig, chestscan, race, agecat, height, weight, bmi, alcohol, hivtest, fluvax, pneumovax, tetanus, highrisklastyear, covidpos]
 
-    df1 = pd.DataFrame([data], columns=['Sex', 'GeneralHealth', 'PhysicalHealthDays', 'MentalHealthDays', 'LastCheckupTime', 'PhysicalActivities', 'SleepHours', 'RemovedTeeth', 'HadAngina', 'HadStroke', 'HadAsthma', 'HadSkinCancer', 'HadCOPD', 'HadDepressiveDisorder', 'HadKidneyDisease', 'HadArthritis', 'HadDiabetes', 'DeafOrHardOfHearing', 'BlindOrVisionDifficulty', 'DifficultyConcentrating', 'DifficultyWalking', 'DifficultyDressingBathing', 'DifficultyErrands', 'SmokerStatus', 'ECigaretteUsage', 'ChestScan', 'RaceEthnicityCategory', 'AgeCategory', 'HeightInMeters', 'WeightInKilograms', 'BMI', 'AlcoholDrinkers', 'HIVTesting', 'FluVaxLast12', 'PneumoVaxEver', 'TetanusLast10Tdap', 'HighRiskLastYear', 'CovidPos', 'HadHeartAttack'])
+    df1 = pd.DataFrame([data], columns=['Sex', 'GeneralHealth', 'PhysicalHealthDays', 'MentalHealthDays', 'LastCheckupTime', 'PhysicalActivities', 'SleepHours', 'RemovedTeeth', 'HadAngina', 'HadStroke', 'HadAsthma', 'HadSkinCancer', 'HadCOPD', 'HadDepressiveDisorder', 'HadKidneyDisease', 'HadArthritis', 'HadDiabetes', 'DeafOrHardOfHearing', 'BlindOrVisionDifficulty', 'DifficultyConcentrating', 'DifficultyWalking', 'DifficultyDressingBathing', 'DifficultyErrands', 'SmokerStatus', 'ECigaretteUsage', 'ChestScan', 'RaceEthnicityCategory', 'AgeCategory', 'HeightInMeters', 'WeightInKilograms', 'BMI', 'AlcoholDrinkers', 'HIVTesting', 'FluVaxLast12', 'PneumoVaxEver', 'TetanusLast10Tdap', 'HighRiskLastYear', 'CovidPos'])
 
-    data_org._append(df1, ignore_index=True)
+    data_concat = pd.concat([df1, data_org], ignore_index=True)
 
     # Aplicar o pipeline
-
-    df_tratada = pipeline.pipelines(data_org)
+    df_tratada = pipeline.pipelines(data_concat)
 
     df = df_tratada.create()
+    df = df.loc[[0]]
     print(df)
 
+    promissores = 0
+
     # Prever o ataque cardíaco
-    catboost = modrf.predict(df)
-    st.write('CatBoost:', catboost[0])
+    catboost_pred = modcat.predict(df)[0]
+
+    knn_pred = modknn.predict(df)[0]
+
+    log_pred = modlog.predict(df)[0]
+
+    rf_pred = modrf.predict(df)[0]
+
+    redes_pred = (modredes.predict(df) >0.5).astype("int32")
+    redes_pred = redes_pred[0][0]
+
+    if catboost_pred == 1:
+        st.write('**Catboost:** :red[O modelo CatBoost prevê que o paciente terá um ataque cardíaco.]')
+        promissores += 1
+    elif catboost_pred == 0:
+        st.write('**Catboost:** :green[O modelo CatBoost prevê que o paciente não terá um ataque cardíaco.]')
+
+    if knn_pred == 1:
+        st.write('**KNN:** :red[O modelo KNN prevê que o paciente terá um ataque cardíaco.]')
+        promissores += 1
+    elif knn_pred == 0:
+        st.write('**KNN:** :green[O modelo KNN prevê que o paciente não terá um ataque cardíaco.]')
+    
+    if log_pred == 1:
+        st.write('**Regressão Logística:** :red[O modelo de Regressão Logística prevê que o paciente terá um ataque cardíaco.]')
+        promissores += 1
+    elif log_pred == 0:
+        st.write('**Regressão Logística:** :green[O modelo de Regressão Logística prevê que o paciente não terá um ataque cardíaco.]')
+
+    if rf_pred == 1:
+        st.write('**Random Forest:** :red[O modelo Random Forest prevê que o paciente terá um ataque cardíaco.]')
+        promissores += 1
+    elif rf_pred == 0:
+        st.write('**Random Forest:** :green[O modelo Random Forest prevê que o paciente não terá um ataque cardíaco.]')
+
+    if redes_pred == 1:
+        st.write('**Redes Neurais:** :red[O modelo de Redes Neurais prevê que o paciente terá um ataque cardíaco.]')
+        promissores += 1
+    elif redes_pred == 0:
+        st.write('**Redes Neurais:** :green[O modelo de Redes Neurais prevê que o paciente não terá um ataque cardíaco.]')
+
+    st.write(f'  **{promissores}/5 modelos previram que o paciente terá um ataque cardíaco.**')

@@ -27,7 +27,7 @@ class pipelines():
 
         def PhysicalActivities_transformation(dados):
             yesorno = utility.yesOrNoTo01(dados)
-            data = yesorno.transform(['PhysicalActivities','HadHeartAttack','HadAngina','HadStroke','HadAsthma','HadSkinCancer','HadCOPD','HadDepressiveDisorder','HadKidneyDisease','HadArthritis','DeafOrHardOfHearing','BlindOrVisionDifficulty','DifficultyConcentrating','DifficultyWalking','DifficultyDressingBathing','DifficultyErrands','ChestScan','AlcoholDrinkers','HIVTesting','FluVaxLast12','PneumoVaxEver','CovidPos','HighRiskLastYear'])
+            data = yesorno.transform(['PhysicalActivities','HadAngina','HadStroke','HadAsthma','HadSkinCancer','HadCOPD','HadDepressiveDisorder','HadKidneyDisease','HadArthritis','DeafOrHardOfHearing','BlindOrVisionDifficulty','DifficultyConcentrating','DifficultyWalking','DifficultyDressingBathing','DifficultyErrands','ChestScan','AlcoholDrinkers','HIVTesting','FluVaxLast12','PneumoVaxEver','CovidPos','HighRiskLastYear'])
             return data
 
         def normalization(dados):

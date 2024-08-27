@@ -49,8 +49,10 @@ with disp:
     st.header('Gráficos de Violino')
     dispx = st.selectbox('Selecione o eixo x:', df.columns)
     dispy = st.selectbox('Selecione o eixo y:', df.columns)
+
     but = disp.form_submit_button('Gerar gráfico')
     if but:
+
         fig = px.violin(df, x=dispx, y=dispy, width=650)
         st.plotly_chart(fig)
 
