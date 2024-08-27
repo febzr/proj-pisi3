@@ -8,9 +8,13 @@ import pipeline
 from catboost import CatBoostClassifier
 import tensorflow as tf
 import keras
+import gzip
 
 # Carregar os modelos
-modrf = pickle.load(open('./models/rf.pkl', 'rb'))
+modrar = gzip.open('./models/rf.pkl.gz', 'rb')
+
+#modrf = pickle.load(open('./models/rf.pkl', 'rb'))
+modrf = pickle.load(modrar)
 modlog = pickle.load(open('./models/lr.pkl', 'rb'))
 modknn = pickle.load(open('./models/knn_model.pkl', 'rb'))
 

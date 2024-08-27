@@ -1,14 +1,15 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-import pipeline
+import pipeline_gen
 import classificacao
 
 df = pd.read_parquet('heart_2022_no_nans.parquet')
 df2 = df
 df2.drop(columns=['State'], inplace=True)
-data = pipeline.pipelines(df2)
+data = pipeline_gen.pipelines(df2)
 dpip = data.create()
+print(dpip)
 
 st.title('Heart Disease Indicators, 2022')
 st.write('Interaja com os dados da base e veja os gráficos gerados.')
