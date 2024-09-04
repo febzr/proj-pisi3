@@ -22,6 +22,9 @@ modcat.load_model('./models/catboost_model')
 
 modredes = keras.models.load_model('./models/redes.keras', custom_objects={'f1_scorez': 'f1_scorez'})
 
+#PARTE DO STREAMLIT
+st.set_page_config(page_title='Previsão de Ataque Cardíaco', page_icon=':heart:', layout='centered', initial_sidebar_state='auto')
+
 st.title('Previsão de Ataque Cardíaco')
 st.write('Baseado nos dados inseridos, o modelo prevê se o paciente terá um ataque cardíaco ou não.')
 
@@ -46,9 +49,9 @@ with forms:
     elif genhealth == "Ruim":
         genhealth = "Poor"
 
-    physhealthdays = st.number_input(label='Quantos dias de saúde física ruim nos últimos 30 dias?', min_value=0, max_value=30, value=0, step=1, format=None, key=None)
+    physhealthdays = st.number_input(label='Dos últimos 30 dias, quantos você se sentiu mal fisicamente?', min_value=0, max_value=30, value=0, step=1, format=None, key=None)
 
-    menthealthdays = st.number_input(label='Quantos dias de saúde mental ruim nos últimos 30 dias?', min_value=0, max_value=30, value=0, step=1, format=None, key=None)
+    menthealthdays = st.number_input(label='Dos últimos 30 dias, quantos você se sentiu mal mentalmente?', min_value=0, max_value=30, value=0, step=1, format=None, key=None)
 
     lastcheckup = st.radio(label='Quando foi a última vez que você fez um check-up?', options=["Menos de um ano", "Dentro dos últimos 2 anos", "Dentre os últimos 5 anos", "Há 5 anos ou mais"], index=None, horizontal=False)
     if lastcheckup == "Menos de um ano":
@@ -78,7 +81,7 @@ with forms:
     elif removedteeth == "Nenhum":
         removedteeth = "None of them"
 
-    angina = st.radio(label='Você sente dores no peito?', options=["Sim", "Não"], index=None, horizontal=True)
+    angina = st.radio(label='Você sente dores fortes no peito constantemente?', options=["Sim", "Não"], index=None, horizontal=True)
     if angina == "Sim":
         angina = "Yes"
     elif angina == "Não":
@@ -114,7 +117,7 @@ with forms:
     elif depressivedisorder == "Não":
         depressivedisorder = "No"
 
-    kidneydisease = st.radio(label='Você tem ou teve doença renal crônica?', options=["Sim", "Não"], index=None, horizontal=True)
+    kidneydisease = st.radio(label='Você tem alguma doença renal crônica?', options=["Sim", "Não"], index=None, horizontal=True)
     if kidneydisease == "Sim":
         kidneydisease = "Yes"
     elif kidneydisease == "Não":
@@ -136,19 +139,19 @@ with forms:
     elif diabetes == "Não":
         diabetes = "No"
 
-    deaf = st.radio(label='Você é surdo ou tem dificuldade auditiva?', options=["Sim", "Não"], index=None, horizontal=True)
+    deaf = st.radio(label='Você é surdo ou tem dificuldade auditiva impeditiva?', options=["Sim", "Não"], index=None, horizontal=True)
     if deaf == "Sim":
         deaf = "Yes"
     elif deaf == "Não":
         deaf = "No"
 
-    blind = st.radio(label='Você é cego ou tem dificuldade visual?', options=["Sim", "Não"], index=None, horizontal=True)
+    blind = st.radio(label='Você é cego ou tem dificuldade visual impeditiva?', options=["Sim", "Não"], index=None, horizontal=True)
     if blind == "Sim":
         blind = "Yes"
     elif blind == "Não":
         blind = "No"
 
-    concentrating = st.radio(label='Você tem dificuldade de concentração?', options=["Sim", "Não"], index=None, horizontal=True)
+    concentrating = st.radio(label='Você tem dificuldade severa de concentração?', options=["Sim", "Não"], index=None, horizontal=True)
     if concentrating == "Sim":
         concentrating = "Yes"
     elif concentrating == "Não":
@@ -198,7 +201,7 @@ with forms:
     elif chestscan == "Não":
         chestscan = "No"
 
-    race = st.radio(label='Qual a sua raça?', options=["Preto", "Branco", "Pardo", "Hispânico"], index=None, horizontal=False)
+    race = st.radio(label='Qual a sua raça?', options=["Preto", "Branco", "Pardo"], index=None, horizontal=False)
     if race == "Preto":
         race = "Black only, Non-Hispanic"
     if race == "Branco":
@@ -241,13 +244,13 @@ with forms:
 
     weight = st.number_input(label='Qual o seu peso em quilogramas?', min_value=0, max_value=300, value=0, step=1, format=None, key=None)
 
-    alcohol = st.radio(label='Você bebe álcool?', options=["Sim", "Não"], index=None, horizontal=True)
+    alcohol = st.radio(label='Você consome álcool?', options=["Sim", "Não"], index=None, horizontal=True)
     if alcohol == "Sim":
         alcohol = "Yes"
     elif alcohol == "Não":
         alcohol = "No"
 
-    hivtest = st.radio(label='Você já fez um teste de HIV?', options=["Sim", "Não"], index=None, horizontal=True)
+    hivtest = st.radio(label='Você é soropositvo (HIV Positivo)?', options=["Sim", "Não"], index=None, horizontal=True)
     if hivtest == "Sim":
         hivtest = "Yes"
     elif hivtest == "Não":
@@ -265,7 +268,7 @@ with forms:
     elif pneumovax == "Não":
         pneumovax = "No"
 
-    covidpos = st.radio(label='Você testou positivo para COVID-19?', options=["Sim", "Não"], index=None, horizontal=True)
+    covidpos = st.radio(label='Você já testou positivo para COVID-19?', options=["Sim", "Não"], index=None, horizontal=True)
     if covidpos == "Sim":
         covidpos = "Yes"
     elif covidpos == "Não":
@@ -321,7 +324,10 @@ if forms.form_submit_button('Prever Ataque Cardíaco'):
     rf_pred = modrf.predict(df)[0]
 
     redes_pred = (modredes.predict(df) >0.5).astype("int32")
+    redes_pred_porc = modredes.predict(df)
+
     redes_pred = redes_pred[0][0]
+    redes_pred_porc = redes_pred_porc[0][0]
 
     if catboost_pred == 1:
         st.write('**Catboost:** :red[O modelo CatBoost prevê que o paciente terá um ataque cardíaco.]')
@@ -348,9 +354,9 @@ if forms.form_submit_button('Prever Ataque Cardíaco'):
         st.write('**Random Forest:** :green[O modelo Random Forest prevê que o paciente não terá um ataque cardíaco.]')
 
     if redes_pred == 1:
-        st.write('**Redes Neurais:** :red[O modelo de Redes Neurais prevê que o paciente terá um ataque cardíaco.]')
+        st.write(f'**Redes Neurais:** :red[O modelo de Redes Neurais prevê que o paciente terá um ataque cardíaco. A probabilidade aproximada é de {round(redes_pred_porc*100, 2)}%.]')
         promissores += 1
     elif redes_pred == 0:
         st.write('**Redes Neurais:** :green[O modelo de Redes Neurais prevê que o paciente não terá um ataque cardíaco.]')
 
-    st.write(f'  **Segundo a média dos modelos, há uma probabilidade de {round((promissores/5)*100, 2)}% de o paciente ter um ataque cardíaco.**')
+    st.write(f'  **Dos 5 modelos, {promissores} preveem que o paciente terá um ataque cardíaco.**')

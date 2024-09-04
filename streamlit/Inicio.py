@@ -11,6 +11,10 @@ data = pipeline_gen.pipelines(df2)
 dpip = data.create()
 print(dpip)
 
+
+# PARTE DO STREAMLIT
+st.set_page_config(page_title='Início - HDI2022', page_icon=':heart:', layout='centered', initial_sidebar_state='auto')
+
 st.title('Heart Disease Indicators, 2022')
 st.write('Interaja com os dados da base e veja os gráficos gerados.')
 
@@ -47,7 +51,7 @@ with dist2:
 disp = st.form(border=True, key='disp')
 
 with disp:
-    st.header('Gráficos de Violino')
+    st.header('Gráfico de Violino')
     dispx = st.selectbox('Selecione o eixo x:', df.columns)
     dispy = st.selectbox('Selecione o eixo y:', df.columns)
 
@@ -55,14 +59,4 @@ with disp:
     if but:
 
         fig = px.violin(df, x=dispx, y=dispy, width=650)
-        st.plotly_chart(fig)
-
-featimp = st.form(border=True, key='featimp')
-
-with featimp:
-    st.header('Feature Importance')
-    nfeat = st.number_input('Número de estimadores:', min_value=1, max_value=200, value=10, key='nfeat')
-    rdfor = classificacao.classificar(dpip, nfeat, 'florest')
-    if featimp.form_submit_button('Gerar gráfico'):
-        fig = rdfor.randomflorest_importancia_feature_grafico()
         st.plotly_chart(fig)
