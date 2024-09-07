@@ -2,7 +2,6 @@ import streamlit as st
 import plotly.express as px
 import pandas as pd
 import pipeline_gen
-import classificacao
 
 df = pd.read_parquet('heart_2022_no_nans.parquet')
 df2 = df

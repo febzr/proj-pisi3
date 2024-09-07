@@ -1,13 +1,6 @@
 import streamlit as st
-import plotly.express as px
 import pipeline
 import pandas as pd
-from sklearn.cluster import KMeans
-import plotly.graph_objects as go
-from sklearn.decomposition import PCA
-import plotly.express as px
-from sklearn.cluster import KMeans
-import plotly.graph_objects as go
 import plotly.io as pio
 from imblearn.under_sampling import RandomUnderSampler
 
@@ -29,11 +22,11 @@ rus = RandomUnderSampler(random_state=42)
 
 #IMPORTS
 cotovelo = pio.read_json('graph/cotovelo.json')
-actcluster = pio.read_json('graph/actcluster.json')
-alcoholcluster = pio.read_json('graph/alcoholcluster.json')
-attackcluster = pio.read_json('graph/attackcluster.json')
+actcluster = pio.read_json('graph/grafico_atividades_fisicas.json')
+alcoholcluster = pio.read_json('graph/grafico_alcohol.json')
+attackcluster = pio.read_json('graph/grafico_hadheartattack.json')
 idadescluster = pio.read_json('graph/idadecluster.json')
-sexcluster = pio.read_json('graph/sexcluster.json')
+sexcluster = pio.read_json('graph/grafico_sexo.json')
 tamanhocluster = pio.read_json('graph/tamanhocluster.json')
 
 # PARTE DO STREAMLIT
@@ -42,6 +35,15 @@ st.set_page_config(page_title='Clusterização', page_icon=':heart:', layout='ce
 st.title("CLUSTERIZAÇÃO")
 st.markdown("Gráfico do método do cotovelo para auxiliar na escolha do número de clusters")
 st.plotly_chart(cotovelo)
+st.markdown('Gráficos de Silhueta para melhor determinar a quantidade de clusters')
+
+containersilhueta = st.container(border=True)
+
+with containersilhueta:
+    st.image('graph/silhouette_4.png', width=670)
+    st.image('graph/silhouette_5.png', width=670)
+    st.image('graph/silhouette_6.png', width=670)
+
 st.plotly_chart(tamanhocluster)
 contexto = st.container()
 

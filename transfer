@@ -1,0 +1,27 @@
+import streamlit as st
+import pandas as pd
+import numpy as np
+import joblib
+from sklearn.ensemble import RandomForestClassifier
+import pipeline
+
+base = pd.read_parquet('./heart_2022_no_nans.parquet')
+base.drop(columns=['State'], inplace=True)
+
+print(base.columns.tolist())
+
+lista = base["AgeCategory"].unique()
+print(lista)
+
+#base_tratada = pipeline.pipelines(base)
+
+#base_dps = base_tratada.create()
+
+#print(base_dps)
+#print(base_dps.columns.tolist())
+# Prever com os modelos
+# previsao
+
+#negocio = modcat.predict(base_dps)
+#print(negocio[0])
+
